@@ -17,6 +17,9 @@
         "role": "Developer"
     }
   ],
+  "require": {
+    "composer/installers": "^1.0"
+  },  
   "keywords": [
     "wordpress", "dustjs", "dustpress", "debugger", "theme", "framework", "javascript"
   ],
