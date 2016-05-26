@@ -3,7 +3,7 @@
 Plugin Name: DustPress Debugger
 Plugin URI: http://www.geniem.com
 Description: Provides handy ajaxified debugger tool for DustPress based themes.
-Version: 1.0.1
+Version: 1.0.2
 Author: Geniem Oy / Miika Arponen & Ville Siltala
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -12,18 +12,20 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.en.html
 class DustPress_Debugger {
 
 	public function __construct() {
-		// Register the debugger script
-		wp_register_script( "dustpress_debugger",  plugin_dir_url( __FILE__ ) .'js/dustpress-debugger.js', ['jquery'], '0.0.2', true );
+		if ( is_user_logged_in() && current_user_can( "manage_options" ) ) {
+			// Register the debugger script
+			wp_register_script( "dustpress_debugger",  plugin_dir_url( __FILE__ ) .'js/dustpress-debugger.js', ['jquery'], '0.0.2', true );
 
-		// jsonView jQuery plugin
-		wp_enqueue_style( "jquery.jsonview", plugin_dir_url( __FILE__ ) .'css/jquery.jsonview.css', null, null, null );
-		wp_enqueue_script( "jquery.jsonview", plugin_dir_url( __FILE__ ) .'js/jquery.jsonview.js', ['jquery'], null, true );
+			// jsonView jQuery plugin
+			wp_enqueue_style( "jquery.jsonview", plugin_dir_url( __FILE__ ) .'css/jquery.jsonview.css', null, null, null );
+			wp_enqueue_script( "jquery.jsonview", plugin_dir_url( __FILE__ ) .'js/jquery.jsonview.js', ['jquery'], null, true );
 
-		// Register debugger ajax hook
-		add_action( 'wp_ajax_dustpress_debugger', array( $this, 'get_debugger_data' ) );
-		add_action( 'wp_ajax_nopriv_dustpress_debugger', array( $this, 'get_debugger_data' ) );
+			// Register debugger ajax hook
+			add_action( 'wp_ajax_dustpress_debugger', array( $this, 'get_debugger_data' ) );
+			add_action( 'wp_ajax_nopriv_dustpress_debugger', array( $this, 'get_debugger_data' ) );
 
-		add_action( "dustpress/debugger", array( $this, "debugger" ), 1, 1 );
+			add_action( "dustpress/debugger", array( $this, "debugger" ), 1, 1 );
+		}
 	}
 
 	public function debugger( $hash ) {	
