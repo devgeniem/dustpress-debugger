@@ -11,6 +11,14 @@
 namespace DustPress;
 
 use add_action;
+use admin_url;
+use current_user_can;
+use is_user_logged_in;
+use plugin_dir_url;
+use wp_localize_script;
+use wp_enqueue_script;
+use wp_enqueue_style;
+use wp_register_script;
 
 class DustPress_Debugger {
 
