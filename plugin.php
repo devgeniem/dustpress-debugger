@@ -12,7 +12,7 @@ namespace DustPress;
 
 use add_action;
 
-class DustPress_Debugger {
+class Debugger {
 
 	public static function init() {
 		if ( is_user_logged_in() && current_user_can( "manage_options" ) ) {
@@ -69,4 +69,4 @@ class DustPress_Debugger {
 	}
 }
 
-add_action( 'init', __NAMESPACE__ . '\\DustPress_Debugger::init' );
+add_action( 'init', __NAMESPACE__ . '\\Debugger::init' );
