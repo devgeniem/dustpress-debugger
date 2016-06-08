@@ -29,8 +29,8 @@ OR add it into your `composer.json`:
 ## Usage
 
 The debugger prints out a toggle button on the bottom of your page. Clicking the button opens the debugger overlay view. In the debugger view you can:
-* open and close data sets recursively by holding down the 'Shift' key while clicking an item.
-* close the debugger by pressing the 'Esc' key.
+* Open and close data sets recursively by holding down the 'Shift' key while clicking an item.
+* Close the debugger by pressing the 'Esc' key.
 
 ### Add data with JavaScript
 
