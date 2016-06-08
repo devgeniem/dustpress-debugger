@@ -1,65 +1,127 @@
 /*
  * DUSTPRESS DEBUGGER
  */
-jQuery(document).ready(function($) {
+window.DustPressDebugger = ( function( window, document, $ ) {
 
-	// button
-	var html = '<button class="jsonview_open_debug">Show debugger</button>\n';
-	// container
-	html += '<div class="jsonview_data_debug jsonview_data_debug_closed"><span class="jsonview_close_debug">x</span></div>';
-
-	$(html).appendTo('body');
-
-	var div = "<div class=\"jsonview_debug\"></div>";
-
-	$(div).appendTo(".jsonview_data_debug");
-
-	// load debugger data
-	$.ajax({
-		type: "POST",
-        url: dustpress_debugger.ajaxurl,        
-        data: {
-            'action':'dustpress_debugger',
-            'hash' : dustpress_debugger.hash
+    var app = {
+        jsonSettings: {
+            collapsed: true,
+            recursive_collapser: false
         },
-        success:function(data) {                    	
-            var jsonData = $.parseJSON(data);
+        extended: 0,
+        waiting: {}
+    };
 
-            // log also into console
-			console.log('Debugger', jsonData);
+    // Runs the debugger
+    app.init = function() {
+        app.cache();
 
-			var jsonView = $(".jsonview_debug").JSONView(
-				jsonData.data,
-				{ 
-					collapsed: true,
-					recursive_collapser: false
-				}
-			);
-        },
-        error: function(e){
-            console.log('DustPressDebugger Error', e);
+        // Append the debugger into the DOM
+        app.$toggler.appendTo("body");
+        app.$container.appendTo("body");
+        app.$closeBtn.appendTo(app.$container);
+        app.$jsonDiv.appendTo(app.$container);
+
+        // Add listener for the togglers
+        app.$toggler.on('click', app.toggleDebugger);
+        app.$closeBtn.on('click', app.toggleDebugger);
+
+        // Add a listener for the keyup event
+        $(document).keyup(app.closeByEsc);
+
+        // Load the data from via AJAX
+        app.loadData();
+    };
+
+    // Maps the DOM
+    app.cache = function() {
+        app.$debugger   = $(".jsonview_data_debug");
+        app.$toggler    = $('<button class="jsonview_open_debug">Show debugger</button>');
+        app.$closeBtn   = $('<span class="jsonview_close_debug">x</span>');
+        app.$container  = $('<div class="jsonview_data_debug jsonview_data_debug_closed"></div>');
+        app.$jsonDiv    = $('<div class="jsonview_debug"></div>');
+    };
+
+    // Loads the debugger data
+    app.loadData = function() {
+        $.ajax({
+            type: "POST",
+            url: dustpress_debugger.ajaxurl,
+            data: {
+                "action":   "dustpress_debugger",
+                "hash" :    dustpress_debugger.hash
+            },
+            success:function(data) {
+                if (typeof data !== "object") {
+                    data = JSON.parse(data);
+                }
+                app.jsonData = data.data;
+
+                app.jsonData.Ajax = app.waiting;
+                delete app.waiting;
+
+                // Log also into the console
+                console.log("Debugger", app.jsonData);
+
+                app.jsonView = app.$jsonDiv.JSONView(
+                    app.jsonData,
+                    app.jsonSettings
+                );
+            },
+            error: function(e){
+                console.log("DustPress Debugger Error", e);
+            }
+        });
+    };
+
+    app.closeByEsc = function(e) {
+        // Escape key maps to keycode 27
+        if (e.keyCode == 27) {
+            if ( ! $(".jsonview_data_debug").hasClass("jsonview_data_debug_closed") ) {
+                app.toggleDebugger();
+            }
         }
-    });  
+    };
 
-	$(document).keyup(function(e) {
-	     if (e.keyCode == 27) { // escape key maps to keycode `27`
-	        if ( ! $(".jsonview_data_debug").hasClass('jsonview_data_debug_closed') ) {
-	        	toggleDebugger();
-	        }
-	    }
-	});
-
-	$(".jsonview_open_debug").click(function() {
-		toggleDebugger();
-	});
-	$(".jsonview_close_debug").click(function() {
-		toggleDebugger();
-	});
-
-	var toggleDebugger = function() {
-		$(".jsonview_data_debug").toggleClass('jsonview_data_debug_closed');	
-		$(".jsonview_open_debug").toggleClass('jsonview_hide');	
+	app.toggleDebugger = function() {
+		app.$container.toggleClass("jsonview_data_debug_closed");
+		app.$toggler.toggleClass("jsonview_hide");
 		$("body").toggleClass("locked");
-	}
+	};
 
-});
+    app.extend = function(data, key) {
+        if (!key) {
+            key = "NoKey";
+        }
+
+        // Catch the data before the JSONView is rendered
+        if ( undefined == app.jsonData ) {
+            if ( "undefined" === typeof app.waiting[key] ) {
+                app.waiting[key] = [];
+            }
+            app.waiting[key].push(data);
+        }
+        // Add the extended data and rerender the JSONView
+        else {
+            if ( undefined === app.jsonData.Ajax ) {
+                app.jsonData.Ajax = {};
+            }
+
+            if ( undefined === app.jsonData.Ajax[key] ) {
+                app.jsonData.Ajax[key] = [];
+            }
+            app.jsonData.Ajax[key].push(data);
+
+            app.$jsonDiv.JSONView(
+                app.jsonData,
+                app.jsonSettings
+            );
+        }
+    };
+
+    // Run the debugger
+    $(document).ready( app.init );
+
+    return app;
+
+})( window, document, jQuery );

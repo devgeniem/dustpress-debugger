@@ -7,7 +7,7 @@ body.locked {
 }
 
 .jsonview_open_debug {
-    z-index: 100000;
+    z-index: 16777271;
     position: fixed;
     bottom: 20px;
     left: 20px;
@@ -18,7 +18,7 @@ body.locked {
     /*#3F2B58;*/
     background: #EF133C;
     border-bottom: 5px solid rgba(0,0,0,0.3);
-    
+
     color: #fff;
     text-transform: uppercase;
     font-family: Helvetica, Arial, sans-serif;
@@ -26,10 +26,10 @@ body.locked {
     font-size: 12px;
     cursor: pointer;
 
-    -webkit-transition: background .25s; 
-      -moz-transition: background .25s; 
-      -ms-transition: background .25s; 
-      -o-transition: background .25s; 
+    -webkit-transition: background .25s;
+      -moz-transition: background .25s;
+      -ms-transition: background .25s;
+      -o-transition: background .25s;
       transition: background .25s;
 }
 
@@ -39,9 +39,9 @@ body.locked {
 }
 
 .jsonview_data_debug {
-    position: fixed;    
-    z-index: 100000;
-    height: 100%;    
+    position: fixed;
+    z-index: 16777271;
+    height: 100%;
     min-width: 100%;
     max-width: 100%;
     overflow: auto;
@@ -57,11 +57,11 @@ body.locked {
     transform: translate3d(0, 0, 0);
     transform-origin: top;
 
-    -webkit-transition: transform .25s; 
-      -moz-transition: transform .25s; 
-      -ms-transition: transform .25s; 
-      -o-transition: transform .25s; 
-      transition: transform .25s; 
+    -webkit-transition: transform .25s;
+      -moz-transition: transform .25s;
+      -ms-transition: transform .25s;
+      -o-transition: transform .25s;
+      transition: transform .25s;
 
 
     box-sizing: border-box;
@@ -80,17 +80,17 @@ body.locked {
 
 .jsonview_close_debug {
     position: absolute;
-    z-index: 100001;
+    z-index: 16777271;
     display: block;
     top: 80px;
     right: 40px;
     width: 40px;
     height: 40px;
-    padding: 0;    
+    padding: 0;
 
     border: none;
     background: #EF133C;
-    
+
     text-align: center;
     line-height: 35px;
     font-size: 30px;
@@ -102,10 +102,10 @@ body.locked {
     text-decoration:none;
     overflow:visible;
 
-    -webkit-transition: background .25s; 
-      -moz-transition: background .25s; 
-      -ms-transition: background .25s; 
-      -o-transition: background .25s; 
+    -webkit-transition: background .25s;
+      -moz-transition: background .25s;
+      -ms-transition: background .25s;
+      -o-transition: background .25s;
       transition: background .25s;
 }
 
@@ -119,71 +119,101 @@ body.locked {
 }
 
 .jsonview {
-    color: #333;    
+    color: #333;
     padding: 40px;
     padding-top: 80px;
     font-family: monospace;
     font-size: 1.3em;
-    white-space: pre-wrap; 
+    white-space: pre-wrap;
     max-width: 100%;
 }
+
 .jsonview .prop {
-    font-weight: bold; 
+    font-family: monospace;
+    font-weight: bold;
 }
+
 .jsonview .null {
-    color: red; 
+    font-family: monospace;
+    color: red;
 }
+
 .jsonview .bool {
-    color: blue; 
+    font-family: monospace;
+    color: blue;
 }
+
 .jsonview .num {
-    color: blue; 
+    font-family: monospace;
+    color: blue;
 }
+
 .jsonview .string {
+    font-family: monospace;
     color: green;
-    white-space: pre-wrap; 
+    white-space: pre-wrap;
 }
+
 .jsonview .string.multiline {
+    font-family: monospace;
     display: inline-block;
-    vertical-align: text-top; 
+    vertical-align: text-top;
 }
+
 .jsonview .collapser {
+    font-family: monospace;
     position: absolute;
     left: -1em;
-    cursor: pointer; 
+    cursor: pointer;
 }
+
 .jsonview .collapsible {
+    font-family: monospace;
     transition: height 1.2s;
-    transition: width 1.2s; 
+    transition: width 1.2s;
 }
+
 .jsonview .collapsible.collapsed {
+    font-family: monospace;
     height: .8em;
     width: 1em;
     display: inline-block;
     overflow: hidden;
-    margin: 0; 
+    margin: 0;
 }
+
 .jsonview .collapsible.collapsed:before {
+    font-family: monospace;
     content: "…";
     width: 1em;
-    margin-left: .2em; 
+    margin-left: .2em;
 }
+
 .jsonview .collapser.collapsed {
-    transform: rotate(0deg); 
+    font-family: monospace;
+    transform: rotate(0deg);
 }
+
 .jsonview .q {
+    font-family: monospace;
     display: inline-block;
     width: 0px;
-    color: transparent; 
+    color: transparent;
 }
+
 .jsonview li {
-    position: relative; 
+    font-family: monospace;
+    position: relative;
 }
+
 .jsonview ul {
+    font-family: monospace;
     list-style: none;
     margin: 0 0 0 2em;
-    padding: 0; 
+    padding: 0;
 }
+
 .jsonview h1 {
+    font-family: monospace;
     font-size: 1.2em;
 }
