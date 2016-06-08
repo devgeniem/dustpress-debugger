@@ -32,7 +32,7 @@ class Debugger {
     public static function init() {
         if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
             // Register the debugger script
-            wp_register_script( 'dustpress_debugger', plugin_dir_url( __FILE__ ) . 'js/dustpress-debugger.js', [ 'jquery' ], '0.0.2', true );
+            wp_register_script( 'dustpress_debugger', plugin_dir_url( __FILE__ ) . 'js/dustpress-debugger-min.js', [ 'jquery' ], '0.0.2', true );
 
             // JsonView jQuery plugin
             wp_enqueue_style( 'jquery.jsonview', plugin_dir_url( __FILE__ ) .'css/jquery.jsonview.css', null, null, null );
