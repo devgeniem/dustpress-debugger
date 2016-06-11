@@ -19,7 +19,7 @@
   ],
   "require": {
     "php": ">=5.4",
-    "devgeniem/dustpress": ">=0.4.0",
+    "devgeniem/dustpress": ">=0.4.0.2",
     "composer/installers": "v1.0.12"
   },
   "keywords": [
