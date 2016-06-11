@@ -26,6 +26,8 @@ use wp_send_json_success;
  */
 class Debugger {
 
+    private static $hash;
+
     /**
      * Add hooks if the user has correct capabilities.
      */
@@ -42,8 +44,31 @@ class Debugger {
             add_action( 'wp_ajax_dustpress_debugger', array( __CLASS__, 'get_debugger_data' ) );
             add_action( 'wp_ajax_nopriv_dustpress_debugger', array( __CLASS__, 'get_debugger_data' ) );
 
-            add_action( 'dustpress/debugger', array( __CLASS__, 'debugger' ), 1, 1 );
+            add_filter( "dustpress/data", array( __CLASS__, "set_hash" ) );
+
+            add_action( 'dustpress/data/after_render', array( __CLASS__, 'debugger' ), 1, 1 );
         }
+    }
+
+    /**
+     * Sets the hash for the data to the DOM to get.
+     * @param object $data DustPress render data
+     */
+    
+    public static function set_hash( $data ) {
+        // Unique hash
+        self::$hash = md5( $_SERVER[ "REQUEST_URI" ] . microtime() );
+
+        $data_array = array(
+            'ajaxurl'   => admin_url( 'admin-ajax.php' ),
+            'hash'      => self::$hash
+        );
+        
+        wp_localize_script( 'dustpress_debugger', 'dustpress_debugger', $data_array );
+
+        wp_enqueue_script( 'dustpress_debugger' );
+
+        return $data;
     }
 
     /**
@@ -51,15 +76,17 @@ class Debugger {
      *
      * @param  string $hash     The current data hash.
      */
-    public static function debugger( $hash ) {
-        $data_array = array(
-            'ajaxurl'   => admin_url( 'admin-ajax.php' ),
-            'hash'      => $hash,
-        );
+    public static function debugger( $data ) {
+        $data   = apply_filters( 'dustpress/debugger/data', $data );
 
-        wp_localize_script( 'dustpress_debugger', 'dustpress_debugger', $data_array );
+        // start session for data storing
+        if ( session_status() == PHP_SESSION_NONE ) {
+            session_start();
+        }
 
-        wp_enqueue_script( 'dustpress_debugger' );
+        $_SESSION[ self::$hash ] = $data;
+
+        session_write_close();
     }
 
     /**
