@@ -3,7 +3,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.1.2
+ * Version: 1.1.3
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -27,6 +27,7 @@ use wp_send_json_success;
 class Debugger {
 
     private static $hash;
+    private static $data = [];
 
     /**
      * Add hooks if the user has correct capabilities.
@@ -46,7 +47,10 @@ class Debugger {
 
             add_filter( "dustpress/data", array( __CLASS__, "set_hash" ) );
 
-            add_action( 'dustpress/data/after_render', array( __CLASS__, 'debugger' ), 1, 1 );
+            add_action( 'dustpress/data/after_render', array( __CLASS__, 'debugger' ), 100, 1 );
+
+            // Register DustPress core helper hooks
+            add_filter( 'dustpress/menu/data', array( __CLASS__, "gather_menu_helper_data") );
         }
     }
 
@@ -77,14 +81,17 @@ class Debugger {
      * @param  string $hash     The current data hash.
      */
     public static function debugger( $data ) {
-        $data   = apply_filters( 'dustpress/debugger/data', $data );
+
+        $debugger_data = array_merge( $data, self::$data );
+
+        $debugger_data   = apply_filters( 'dustpress/debugger/data', $debugger_data );
 
         // start session for data storing
         if ( session_status() == PHP_SESSION_NONE ) {
             session_start();
         }
 
-        $_SESSION[ self::$hash ] = $data;
+        $_SESSION[ self::$hash ] = $debugger_data;
 
         session_write_close();
     }
@@ -116,6 +123,37 @@ class Debugger {
 
             wp_send_json( $output );
         }
+    }
+
+    public static function gather_menu_helper_data( $data ) {
+        self::set_debugger_data( 'Menu', $data );
+
+        return $data;
+    }
+
+    /**
+    * Gathers debug data from other sources than DustPress core.
+    */
+    public static function set_debugger_data( $key, $data ) {
+        if ( empty( $key ) ) {
+            die( 'You did not set a key for your debugging data collection.' );
+        } else {
+            $debug_data_block_name = dustpress()->get_setting( "debug_data_block_name" );
+
+            $model_data = [];
+
+            if ( ! isset( $model_data[ $debug_data_block_name ] ) ) {
+                $model_data[ $debug_data_block_name ] = [];
+            }
+
+            if ( ! isset( $model_data[ $debug_data_block_name ][ $key ] ) ) {
+                $model_data[ $debug_data_block_name ][ $key ] = [];
+            }
+
+            $model_data[ $debug_data_block_name ][ $key ][] = $data;
+        }
+
+        self::$data = array_merge( self::$data, $model_data );
     }
 }
 
