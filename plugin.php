@@ -51,6 +51,9 @@ class Debugger {
 
             // Register DustPress core helper hooks
             add_filter( 'dustpress/menu/data', array( __CLASS__, "gather_menu_helper_data") );
+
+            // Register DustPress comments helper data
+            add_filter( 'dustpress/comments/data', array( __CLASS__, "gather_comments_helper_data") );
         }
     }
 
@@ -127,6 +130,12 @@ class Debugger {
 
     public static function gather_menu_helper_data( $data ) {
         self::set_debugger_data( 'Menu', $data );
+
+        return $data;
+    }
+
+    public static function gather_comments_helper_data( $data ) {
+        self::set_debugger_data( 'Comments', $data );
 
         return $data;
     }
