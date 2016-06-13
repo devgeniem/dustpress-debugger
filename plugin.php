@@ -3,7 +3,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.1.4
+ * Version: 1.2.0
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -34,23 +34,31 @@ class Debugger {
      */
     public static function init() {
         if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
-            // Register the debugger script
-            wp_register_script( 'dustpress_debugger', plugin_dir_url( __FILE__ ) . 'js/dustpress-debugger-min.js', [ 'jquery' ], '0.0.2', true );
+            // Register user option hooks
+            add_action( 'show_user_profile', array( __CLASS__, "profile_option") );
+            add_action( 'edit_user_profile', array( __CLASS__, "profile_option") );
+            add_action( 'personal_options_update', array( __CLASS__, "save_profile_option") );
+            add_action( 'edit_user_profile_update', array( __CLASS__, "save_profile_option") );
 
-            // JsonView jQuery plugin
-            wp_enqueue_style( 'jquery.jsonview', plugin_dir_url( __FILE__ ) .'css/jquery.jsonview.css', null, null, null );
-            wp_enqueue_script( 'jquery.jsonview', plugin_dir_url( __FILE__ ) .'js/jquery.jsonview.js', [ 'jquery' ], null, true );
+            if ( get_the_author_meta( "dustpress_debugger", get_current_user_id() ) ) {
+                // Register the debugger script
+                wp_register_script( 'dustpress_debugger', plugin_dir_url( __FILE__ ) . 'js/dustpress-debugger-min.js', [ 'jquery' ], '0.0.2', true );
 
-            // Register debugger ajax hook
-            add_action( 'wp_ajax_dustpress_debugger', array( __CLASS__, 'get_debugger_data' ) );
-            add_action( 'wp_ajax_nopriv_dustpress_debugger', array( __CLASS__, 'get_debugger_data' ) );
+                // JsonView jQuery plugin
+                wp_enqueue_style( 'jquery.jsonview', plugin_dir_url( __FILE__ ) .'css/jquery.jsonview.css', null, null, null );
+                wp_enqueue_script( 'jquery.jsonview', plugin_dir_url( __FILE__ ) .'js/jquery.jsonview.js', [ 'jquery' ], null, true );
 
-            add_filter( "dustpress/data", array( __CLASS__, "set_hash" ) );
+                // Register debugger ajax hook
+                add_action( 'wp_ajax_dustpress_debugger', array( __CLASS__, 'get_debugger_data' ) );
+                add_action( 'wp_ajax_nopriv_dustpress_debugger', array( __CLASS__, 'get_debugger_data' ) );
 
-            add_action( 'dustpress/data/after_render', array( __CLASS__, 'debugger' ), 100, 1 );
+                add_filter( "dustpress/data", array( __CLASS__, "set_hash" ) );
 
-            // Register DustPress core helper hooks
-            add_filter( 'dustpress/menu/data', array( __CLASS__, "gather_menu_helper_data") );
+                add_action( 'dustpress/data/after_render', array( __CLASS__, 'debugger' ), 100, 1 );
+
+                // Register DustPress core helper hooks
+                add_filter( 'dustpress/menu/data', array( __CLASS__, "gather_menu_helper_data") );
+            }
         }
     }
 
@@ -150,6 +158,30 @@ class Debugger {
 
             self::$data[ $debug_data_block_name ][ $key ][] = $data;
         }
+    }
+
+    public static function profile_option( $user ) {
+        $current_status = get_the_author_meta( "dustpress_debugger", $user->ID );
+
+        ?>
+        <h3>DustPress Debugger</h3>
+
+        <table class="form-table">
+            <tr>
+                <th><label for="dustpress_debugger">DustPress Debugger enabled</label></th>
+                <td>
+                    <input type="checkbox" name="dustpress_debugger" id="dustpress_debugger"<?php if ( $current_status ): ?> checked="checked"<?php endif; ?>/>
+                </td>
+            </tr>
+        </table>
+    <?php }
+
+    public static function save_profile_option( $user_id ) {
+        if ( ! current_user_can( "edit_user" ) ) {
+            return false;
+        }
+
+        update_usermeta( $user_id, "dustpress_debugger", $_POST["dustpress_debugger"] );
     }
 }
 
