@@ -3,7 +3,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.1.3
+ * Version: 1.1.4
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -51,9 +51,6 @@ class Debugger {
 
             // Register DustPress core helper hooks
             add_filter( 'dustpress/menu/data', array( __CLASS__, "gather_menu_helper_data") );
-
-            // Register DustPress comments helper data
-            add_filter( 'dustpress/comments/data', array( __CLASS__, "gather_comments_helper_data") );
         }
     }
 
@@ -134,12 +131,6 @@ class Debugger {
         return $data;
     }
 
-    public static function gather_comments_helper_data( $data ) {
-        self::set_debugger_data( 'Comments', $data );
-
-        return $data;
-    }
-
     /**
     * Gathers debug data from other sources than DustPress core.
     */
@@ -149,20 +140,16 @@ class Debugger {
         } else {
             $debug_data_block_name = dustpress()->get_setting( "debug_data_block_name" );
 
-            $model_data = [];
-
-            if ( ! isset( $model_data[ $debug_data_block_name ] ) ) {
-                $model_data[ $debug_data_block_name ] = [];
+            if ( ! isset( self::$data[ $debug_data_block_name ] ) ) {
+                self::$data[ $debug_data_block_name ] = [];
             }
 
-            if ( ! isset( $model_data[ $debug_data_block_name ][ $key ] ) ) {
-                $model_data[ $debug_data_block_name ][ $key ] = [];
+            if ( ! isset( self::$data[ $debug_data_block_name ][ $key ] ) ) {
+                self::$data[ $debug_data_block_name ][ $key ] = [];
             }
 
-            $model_data[ $debug_data_block_name ][ $key ][] = $data;
+            self::$data[ $debug_data_block_name ][ $key ][] = $data;
         }
-
-        self::$data = array_merge( self::$data, $model_data );
     }
 }
 
