@@ -3,7 +3,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -181,7 +181,7 @@ class Debugger {
             return false;
         }
 
-        update_usermeta( $user_id, "dustpress_debugger", $_POST["dustpress_debugger"] );
+        update_user_meta( $user_id, "dustpress_debugger", $_POST["dustpress_debugger"] );
     }
 }
 
