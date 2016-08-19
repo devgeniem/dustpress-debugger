@@ -3,7 +3,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.2.2
+ * Version: 1.2.3
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -58,6 +58,9 @@ class Debugger {
 
                 // Register DustPress core helper hooks
                 add_filter( 'dustpress/menu/data', array( __CLASS__, "gather_menu_helper_data") );
+
+                // Prevent DustPress for caching the rendered output so that this plugin works
+                add_filter( "dustpress/cache/rendered", "__return_false", PHP_INT_MAX );
             }
         }
     }
@@ -112,19 +115,22 @@ class Debugger {
             session_start();
 
             $hash = filter_input( INPUT_POST, 'hash' );
-            $data = $_SESSION[ $hash ];
 
-            if ( isset( $data ) ) {
+            if ( isset( $_SESSION[ $hash ] ) ) {
+                $data = $_SESSION[ $hash ];
+                
                 unset( $_SESSION[ $hash ] );
                 $status = 'success';
             } else {
+                $data = null;
+
                 $status = 'error';
             }
 
             // The response data
             $response = [
                 'status'    => $status,
-                'data'      => $data,
+                'data'      => $data
             ];
 
             $output = wp_json_encode( $response );
