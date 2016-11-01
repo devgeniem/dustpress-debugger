@@ -185,7 +185,7 @@ class Debugger {
     <?php }
 
     public static function save_profile_option( $user_id ) {
-        if ( ! current_user_can( "edit_user" ) ) {
+        if ( ! current_user_can( "manage_options" ) || ! isset( $_POST["dustpress_debugger"] ) ) {
             return false;
         }
 
