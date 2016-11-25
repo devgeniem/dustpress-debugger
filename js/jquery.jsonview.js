@@ -53,7 +53,7 @@ https://github.com/yesmeck/jquery-jsonview
     };
 
     JSONFormatter.prototype.stringToHTML = function(value) {
-      var multilineClass, newLinePattern;
+      var collapsible, multilineClass, newLinePattern;
       if (/^(http|https|file):\/\/[^\s]+$/i.test(value)) {
         return "<a href=\"" + (this.htmlEncode(value)) + "\"><span class=\"q\">\"</span>" + (this.jsString(value)) + "<span class=\"q\">\"</span></a>";
       } else {
@@ -66,7 +66,15 @@ https://github.com/yesmeck/jquery-jsonview
             value = (value + '').replace(newLinePattern, '$1' + '<br />');
           }
         }
-        return "<span class=\"string" + multilineClass + "\">\"" + value + "\"</span>";
+
+        if ( value.length > 500 ) {
+          collapsible = ' collapsible';
+        }
+        else {
+          collapsible = ' ';
+        }
+
+        return "<span class=\"string" + multilineClass + collapsible + "\">\"" + value + "\"</span>";
       }
     };
 
