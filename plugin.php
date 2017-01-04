@@ -3,7 +3,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.2.10
+ * Version: 1.2.11
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -123,7 +123,9 @@ class Debugger {
      */
     public static function get_debugger_data() {
         if ( defined( 'DOING_AJAX' ) ) {
-            session_start();
+            if ( session_status() == PHP_SESSION_NONE ) {
+                session_start();
+            }
 
             $hash = filter_input( INPUT_POST, 'hash' );
 
