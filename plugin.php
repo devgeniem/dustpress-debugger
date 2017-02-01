@@ -3,7 +3,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.2.11
+ * Version: 1.3.0-beta
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -106,37 +106,25 @@ class Debugger {
 
         $debugger_data = array_merge( (array) $data, (array) self::$data );
 
-        $debugger_data   = apply_filters( 'dustpress/debugger/data', $debugger_data );
+        $debugger_data = apply_filters( 'dustpress/debugger/data', $debugger_data );
 
-        // start session for data storing
-        if ( session_status() == PHP_SESSION_NONE ) {
-            session_start();
-        }
-
-        $_SESSION[ self::$hash ] = $debugger_data;
-
-        session_write_close();
+        set_transient( 'dustpress_debugger_' . self::$hash, $debugger_data, 5 * 60 );
     }
 
     /**
-     * Function for the AJAX call to get the debugger data from the session.
+     * Function for the AJAX call to get the debugger data from the transient.
      */
     public static function get_debugger_data() {
         if ( defined( 'DOING_AJAX' ) ) {
-            if ( session_status() == PHP_SESSION_NONE ) {
-                session_start();
-            }
 
             $hash = filter_input( INPUT_POST, 'hash' );
 
-            if ( isset( $_SESSION[ $hash ] ) ) {
-                $data = $_SESSION[ $hash ];
-                
-                unset( $_SESSION[ $hash ] );
-                $status = 'success';
-            } else {
-                $data = null;
+            $data = get_transient( 'dustpress_debugger_' . $hash );
 
+            if ( $data ) {
+                $status = 'success';
+            }
+            else {
                 $status = 'error';
             }
 
