@@ -40,8 +40,9 @@ https://github.com/yesmeck/jquery-jsonview
       if ( undefined === this["" + valueType + "ToHTML"] ) {
         console.log("value", value);
       }
-
-      return this["" + valueType + "ToHTML"].call(this, value, level);
+      else {
+        return this["" + valueType + "ToHTML"].call(this, value, level);
+      }
     };
 
     JSONFormatter.prototype.nullToHTML = function(value) {
