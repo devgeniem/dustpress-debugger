@@ -34,9 +34,11 @@ OR add it into your `composer.json`:
 
 - Clone the DustPress Debugger repository into you WordPress plugins directory.
 
+### Activation
+
+The debugger activation is a user specific setting for users with the `manage_options` capability. Activate the debugger by checking the `DustPress Debugger enabled` checkbox on the user profile page in WordPress dashboard.
+
 ## Usage
-
-
 
 The debugger prints out a toggle button on the bottom of your page. Clicking the button opens the debugger overlay view. In the debugger view you can:
 * Open and close data sets recursively by holding down the 'Shift' key while clicking an item.
