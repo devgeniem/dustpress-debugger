@@ -57,7 +57,7 @@ window.DustPressDebugger = ( function( window, document, $ ) {
                 }
                 app.jsonData = data.data;
 
-                app.jsonData.Ajax = app.waiting;
+                app.jsonData.Debugs.Ajax = app.waiting;
                 delete app.waiting;
 
                 // Log also into the console
@@ -83,11 +83,11 @@ window.DustPressDebugger = ( function( window, document, $ ) {
         }
     };
 
-	app.toggleDebugger = function() {
-		app.$container.toggleClass("jsonview_data_debug_closed");
-		app.$toggler.toggleClass("jsonview_hide");
-		$("body").toggleClass("locked");
-	};
+    app.toggleDebugger = function() {
+        app.$container.toggleClass("jsonview_data_debug_closed");
+        app.$toggler.toggleClass("jsonview_hide");
+        $("body").toggleClass("locked");
+    };
 
     app.extend = function(data, key) {
         if (!key) {
@@ -103,14 +103,14 @@ window.DustPressDebugger = ( function( window, document, $ ) {
         }
         // Add the extended data and rerender the JSONView
         else {
-            if ( undefined === app.jsonData.Ajax ) {
-                app.jsonData.Ajax = {};
+            if ( undefined === app.jsonData.Debugs.Ajax ) {
+                app.jsonData.Debugs.Ajax = {};
             }
 
-            if ( undefined === app.jsonData.Ajax[key] ) {
-                app.jsonData.Ajax[key] = [];
+            if ( undefined === app.jsonData.Debugs.Ajax[key] ) {
+                app.jsonData.Debugs.Ajax[key] = [];
             }
-            app.jsonData.Ajax[key].push(data);
+            app.jsonData.Debugs.Ajax[key].push(data);
 
             app.$jsonDiv.JSONView(
                 app.jsonData,

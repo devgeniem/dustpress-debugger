@@ -3,7 +3,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.3.1
+ * Version: 1.3.2
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -43,7 +43,7 @@ class Debugger {
 
             if ( get_the_author_meta( "dustpress_debugger", get_current_user_id() ) ) {
                 // Register the debugger script
-                wp_register_script( 'dustpress_debugger', plugin_dir_url( __FILE__ ) . 'js/dustpress-debugger-min.js', [ 'jquery' ], '0.0.2', true );
+                wp_register_script( 'dustpress_debugger', plugin_dir_url( __FILE__ ) . 'js/dustpress-debugger.js', [ 'jquery' ], '1.3.1', true );
 
                 // JsonView jQuery plugin
                 wp_enqueue_style( 'jquery.jsonview', plugin_dir_url( __FILE__ ) .'css/jquery.jsonview.css', null, null, null );
@@ -57,8 +57,14 @@ class Debugger {
 
                 add_action( 'dustpress/data/after_render', array( __CLASS__, 'debugger' ), 100, 1 );
 
+                add_action( 'dustpress/data/after_render', array( __CLASS__, 'templates' ), 99, 1 );
+
                 // Register DustPress core helper hooks
-                add_filter( 'dustpress/menu/data', array( __CLASS__, "gather_menu_helper_data") );
+                add_filter( 'dustpress/menu/data', array( __CLASS__, "gather_menu_helper_data" ) );
+
+                add_filter( 'dustpress/template', array( __CLASS__, 'main_model' ), 100, 1 );
+
+                add_action( 'dustpress/model_list', array( __CLASS__, 'models' ), 100, 1 );
 
                 // Prevent DustPress for caching the rendered output so that this plugin works
                 add_filter( "dustpress/cache/rendered", "__return_false", ( PHP_INT_MAX - 1000 ) );
@@ -155,15 +161,19 @@ class Debugger {
         } else {
             $debug_data_block_name = dustpress()->get_setting( "debug_data_block_name" );
 
-            if ( ! isset( self::$data[ $debug_data_block_name ] ) ) {
-                self::$data[ $debug_data_block_name ] = [];
+            if ( ! isset( self::$data['Debugs'] ) ) {
+                self::$data['Debugs'] = [];
             }
 
-            if ( ! isset( self::$data[ $debug_data_block_name ][ $key ] ) ) {
-                self::$data[ $debug_data_block_name ][ $key ] = [];
+            if ( ! isset( self::$data['Debugs'][ $debug_data_block_name ] ) ) {
+                self::$data['Debugs'][ $debug_data_block_name ] = [];
             }
 
-            self::$data[ $debug_data_block_name ][ $key ][] = $data;
+            if ( ! isset( self::$data['Debugs'][ $debug_data_block_name ][ $key ] ) ) {
+                self::$data['Debugs'][ $debug_data_block_name ][ $key ] = [];
+            }
+
+            self::$data['Debugs'][ $debug_data_block_name ][ $key ][] = $data;
         }
     }
 
@@ -189,6 +199,34 @@ class Debugger {
         }
 
         update_user_meta( $user_id, "dustpress_debugger", $_POST["dustpress_debugger"] );
+    }
+
+    public static function main_model( $model ) {
+        if ( ! isset( self::$data['Debugs'] ) ) {
+            self::$data['Debugs'] = [];
+        }
+
+        self::$data['Debugs']['Main model'] = $model;
+
+        return $model;
+    }
+
+    public static function templates( $data ) {
+        if ( ! isset( self::$data['Debugs'] ) ) {
+            self::$data['Debugs'] = [];
+        }
+
+        self::$data['Debugs']['Templates']  = array_keys( (array) dustpress()->dust->templates );
+
+        return $data;
+    }
+
+    public static function models( $models ) {
+        if ( ! isset( self::$data['Debugs'] ) ) {
+            self::$data['Debugs'] = [];
+        }
+
+        self::$data['Debugs']['Submodels'] = $models;
     }
 }
 
