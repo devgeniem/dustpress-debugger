@@ -1,7 +1,7 @@
 ![geniem-github-banner](https://cloud.githubusercontent.com/assets/5691777/14319886/9ae46166-fc1b-11e5-9630-d60aa3dc4f9e.png)
 # DustPress Plugin: DustPress Debugger
 
-DustPress Debugger is a WordPress plugin which displays the data loaded by your current DustPress model in a json viewer. To enable the debugger go to the WordPress dashboard and enable the plugin. The debugger option is only visible for users with `manage_options` capability. The debugger needs to be enabled per-user from the profile page.
+DustPress Debugger is a WordPress plugin which displays the data loaded by your current DustPress model in a json viewer.
 
 - Contributors: devgeniem / Nomafin, villesiltala
 - Plugin url: https://github.com/devgeniem/dustpress-debugger
@@ -34,9 +34,11 @@ OR add it into your `composer.json`:
 
 - Clone the DustPress Debugger repository into you WordPress plugins directory.
 
+### Activation
+
+To enable the debugger go to the WordPress dashboard and activate the plugin. After activation users with with the `manage_options` capability can enable the debugger on the user profile page by checking the `DustPress Debugger enabled` checkbox.
+
 ## Usage
-
-
 
 The debugger prints out a toggle button on the bottom of your page. Clicking the button opens the debugger overlay view. In the debugger view you can:
 * Open and close data sets recursively by holding down the 'Shift' key while clicking an item.
