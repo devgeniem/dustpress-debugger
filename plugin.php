@@ -3,7 +3,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.3.3
+ * Version: 1.3.4
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -36,12 +36,12 @@ class Debugger {
     public static function init() {
         if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
             // Register user option hooks
-            add_action( 'show_user_profile', array( __CLASS__, "profile_option") );
-            add_action( 'edit_user_profile', array( __CLASS__, "profile_option") );
-            add_action( 'personal_options_update', array( __CLASS__, "save_profile_option") );
-            add_action( 'edit_user_profile_update', array( __CLASS__, "save_profile_option") );
+            add_action( 'show_user_profile', array( __CLASS__, 'profile_option') );
+            add_action( 'edit_user_profile', array( __CLASS__, 'profile_option') );
+            add_action( 'personal_options_update', array( __CLASS__, 'save_profile_option') );
+            add_action( 'edit_user_profile_update', array( __CLASS__, 'save_profile_option') );
 
-            if ( get_the_author_meta( "dustpress_debugger", get_current_user_id() ) ) {
+            if ( get_the_author_meta( 'dustpress_debugger', get_current_user_id() ) ) {
                 // Register the debugger script
                 wp_register_script( 'dustpress_debugger', plugin_dir_url( __FILE__ ) . 'js/dustpress-debugger.js', [ 'jquery' ], '1.3.1', true );
 
@@ -53,28 +53,28 @@ class Debugger {
                 add_action( 'wp_ajax_dustpress_debugger', array( __CLASS__, 'get_debugger_data' ) );
                 add_action( 'wp_ajax_nopriv_dustpress_debugger', array( __CLASS__, 'get_debugger_data' ) );
 
-                add_filter( "dustpress/data", array( __CLASS__, "set_hash" ) );
+                add_filter( 'dustpress/data', array( __CLASS__, 'set_hash' ) );
 
                 add_action( 'dustpress/data/after_render', array( __CLASS__, 'debugger' ), 100, 1 );
 
                 add_action( 'dustpress/data/after_render', array( __CLASS__, 'templates' ), 99, 1 );
 
                 // Register DustPress core helper hooks
-                add_filter( 'dustpress/menu/data', array( __CLASS__, "gather_menu_helper_data" ) );
+                add_filter( 'dustpress/menu/data', array( __CLASS__, 'gather_menu_helper_data' ) );
 
                 add_filter( 'dustpress/template', array( __CLASS__, 'main_model' ), 100, 1 );
 
                 add_action( 'dustpress/model_list', array( __CLASS__, 'models' ), 100, 1 );
 
                 // Prevent DustPress for caching the rendered output so that this plugin works
-                add_filter( "dustpress/cache/rendered", "__return_false", ( PHP_INT_MAX - 1000 ) );
-                add_filter( "dustpress/cache/partials", "__return_false", ( PHP_INT_MAX - 1000 ) );
+                add_filter( 'dustpress/cache/rendered', '__return_false', ( PHP_INT_MAX - 1000 ) );
+                add_filter( 'dustpress/cache/partials', '__return_false', ( PHP_INT_MAX - 1000 ) );
             }
         }
     }
 
     public static function use_debugger() {
-        if ( is_user_logged_in() && current_user_can( 'manage_options' ) && get_the_author_meta( "dustpress_debugger", get_current_user_id() ) ) {
+        if ( is_user_logged_in() && current_user_can( 'manage_options' ) && get_the_author_meta( 'dustpress_debugger', get_current_user_id() ) ) {
             return true;
         }
         else {
@@ -86,16 +86,16 @@ class Debugger {
      * Sets the hash for the data to the DOM to get.
      * @param object $data DustPress render data
      */
-    
+
     public static function set_hash( $data ) {
         // Unique hash
-        self::$hash = md5( $_SERVER[ "REQUEST_URI" ] . microtime() );
+        self::$hash = md5( $_SERVER[ 'REQUEST_URI' ] . microtime() );
 
         $data_array = array(
             'ajaxurl'   => admin_url( 'admin-ajax.php' ),
             'hash'      => self::$hash
         );
-        
+
         wp_localize_script( 'dustpress_debugger', 'dustpress_debugger', $data_array );
 
         wp_enqueue_script( 'dustpress_debugger' );
@@ -153,13 +153,13 @@ class Debugger {
     }
 
     /**
-    * Gathers debug data from other sources than DustPress core.
-    */
+     * Gathers debug data from other sources than DustPress core.
+     */
     public static function set_debugger_data( $key, $data ) {
         if ( empty( $key ) ) {
             die( 'You did not set a key for your debugging data collection.' );
         } else {
-            $debug_data_block_name = dustpress()->get_setting( "debug_data_block_name" );
+            $debug_data_block_name = dustpress()->get_setting( 'debug_data_block_name' );
 
             if ( ! isset( self::$data['Debugs'] ) ) {
                 self::$data['Debugs'] = [];
@@ -178,7 +178,7 @@ class Debugger {
     }
 
     public static function profile_option( $user ) {
-        $current_status = get_the_author_meta( "dustpress_debugger", $user->ID );
+        $current_status = get_the_author_meta( 'dustpress_debugger', $user->ID );
 
         ?>
         <h3>DustPress Debugger</h3>
@@ -187,18 +187,21 @@ class Debugger {
             <tr>
                 <th><label for="dustpress_debugger">DustPress Debugger enabled</label></th>
                 <td>
-                    <input type="checkbox" name="dustpress_debugger" id="dustpress_debugger"<?php if ( $current_status ): ?> checked="checked"<?php endif; ?>/>
+                    <input type="checkbox" name="dustpress_debugger" value="1" id="dustpress_debugger"<?php if ( $current_status ): ?> checked="checked"<?php endif; ?>/>
                 </td>
             </tr>
         </table>
-    <?php }
+        <?php
+    }
 
     public static function save_profile_option( $user_id ) {
-        if ( ! current_user_can( "manage_options" ) || ! isset( $_POST["dustpress_debugger"] ) ) {
+        if ( ! current_user_can( "manage_options" ) ) {
             return false;
         }
 
-        update_user_meta( $user_id, "dustpress_debugger", $_POST["dustpress_debugger"] );
+        $user_value = (int) filter_input( INPUT_POST, 'dustpress_debugger', FILTER_SANITIZE_NUMBER_INT );
+
+        update_user_meta( $user_id, 'dustpress_debugger', $user_value );
     }
 
     public static function main_model( $model ) {
