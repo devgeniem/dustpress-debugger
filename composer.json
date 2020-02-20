@@ -24,5 +24,6 @@
   "keywords": [
     "wordpress", "plugin", "dustjs", "dustpress", "debugger", "theme", "framework", "javascript"
   ],
-  "minimum-stability": "dev"
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }
