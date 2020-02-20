@@ -43,6 +43,8 @@ class Debugger {
 
                 add_filter( 'dustpress/data', array( __CLASS__, 'set_hash' ) );
 
+                add_action( 'dustpress/data/after_render', array( __CLASS__, 'performance' ), 101, 0 );
+
                 add_action( 'dustpress/data/after_render', array( __CLASS__, 'debugger' ), 100, 1 );
 
                 add_action( 'dustpress/data/after_render', array( __CLASS__, 'templates' ), 99, 1 );
@@ -210,6 +212,10 @@ class Debugger {
         self::$data['Debugs']['Templates']  = array_keys( (array) dustpress()->dust->templates );
 
         return $data;
+    }
+
+    public static function performance() {
+        self::$data['Performance'] = dustpress()->performance;
     }
 
     public static function models( $models ) {
