@@ -3,7 +3,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.5.1
+ * Version: 1.5.2
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -31,7 +31,7 @@ class Debugger {
 
             if ( get_the_author_meta( 'dustpress_debugger', get_current_user_id() ) ) {
                 // Register the debugger script
-                wp_register_script( 'dustpress_debugger', plugin_dir_url( __FILE__ ) . 'js/dustpress-debugger.js', [ 'jquery' ], '1.3.1', true );
+                wp_register_script( 'dustpress_debugger', plugin_dir_url( __FILE__ ) . 'js/dustpress-debugger.js', [ 'jquery' ], '1.5.2', true );
 
                 // JsonView jQuery plugin
                 wp_enqueue_style( 'jquery.jsonview', plugin_dir_url( __FILE__ ) .'css/jquery.jsonview.css', null, null, null );
@@ -43,11 +43,11 @@ class Debugger {
 
                 add_filter( 'dustpress/data', array( __CLASS__, 'set_hash' ) );
 
-                add_action( 'dustpress/data/after_render', array( __CLASS__, 'performance' ), 101, 0 );
+                add_filter( 'dustpress/data/after_render', array( __CLASS__, 'performance' ), 100, 1 );
 
-                add_action( 'dustpress/data/after_render', array( __CLASS__, 'debugger' ), 100, 1 );
+                add_filter( 'dustpress/data/after_render', array( __CLASS__, 'debugger' ), 101, 1 );
 
-                add_action( 'dustpress/data/after_render', array( __CLASS__, 'templates' ), 99, 1 );
+                add_filter( 'dustpress/data/after_render', array( __CLASS__, 'templates' ), 99, 1 );
 
                 // Register DustPress core helper hooks
                 add_filter( 'dustpress/menu/data', array( __CLASS__, 'gather_menu_helper_data' ) );
@@ -99,7 +99,6 @@ class Debugger {
      * @param  string $hash     The current data hash.
      */
     public static function debugger( $data ) {
-
         $debugger_data = array_merge( (array) $data, (array) self::$data );
 
         $debugger_data = apply_filters( 'dustpress/debugger/data', $debugger_data );
@@ -214,8 +213,10 @@ class Debugger {
         return $data;
     }
 
-    public static function performance() {
-        self::$data['Performance'] = dustpress()->performance;
+    public static function performance( $data ) {
+        $data['Performance'] = dustpress()->performance;
+
+        return $data;
     }
 
     public static function models( $models ) {

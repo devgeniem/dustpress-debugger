@@ -19,7 +19,7 @@
   ],
   "require": {
     "php": ">=7.1",
-    "devgeniem/dustpress": ">=1.28.0"
+    "devgeniem/dustpress": ">=1.29.0"
   },
   "keywords": [
     "wordpress", "plugin", "dustjs", "dustpress", "debugger", "theme", "framework", "javascript"
