@@ -7,7 +7,7 @@ DustPress Debugger is a WordPress plugin which displays the data loaded by your 
 - Plugin url: https://github.com/devgeniem/dustpress-debugger
 - Tags: dustpress, wordpress, plugins, dustjs, dust.js
 - Requires at least: 4.2.0
-- Tested up to: 4.5.2
+- Tested up to: 5.3.0
 - License: GPL-3.0
 - License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,6 +37,8 @@ OR add it into your `composer.json`:
 ### Activation
 
 To enable the debugger go to the WordPress dashboard and activate the plugin. After activation users with with the `manage_options` capability can enable the debugger on the user profile page by checking the `DustPress Debugger enabled` checkbox.
+
+You can also activate the debugger on any user by defining `DUSTPRESS_DEBUGGER_ALWAYS_ON` constant in your project. This will override the manual settings, so it is not recommended to use this setting in production!
 
 ## Usage
 

@@ -4,7 +4,7 @@
  * Plugin Name: DustPress Debugger
  * Plugin URI: https://github.com/devgeniem/dustpress-debugger
  * Description: Provides handy ajaxified debugger tool for DustPress based themes.
- * Version: 1.5.2
+ * Version: 1.5.3
  * Author: Geniem Oy / Miika Arponen & Ville Siltala
  * Author URI: http://www.geniem.com
  */
@@ -23,16 +23,29 @@ class Debugger
     /**
      * Add hooks if the user has correct capabilities.
      */
-    public static function init()
-    {
-        if (is_user_logged_in() && current_user_can('manage_options')) {
+    public static function init() {
+        if (
+            (
+                is_user_logged_in() &&
+                current_user_can( 'manage_options' )
+            ) ||
+            (
+                defined( 'DUSTPRESS_DEBUGGER_ALWAYS_ON' ) &&
+                \DUSTPRESS_DEBUGGER_ALWAYS_ON === true
+            ) ) {
             // Register user option hooks
             add_action('show_user_profile', array(__CLASS__, 'profile_option'));
             add_action('edit_user_profile', array(__CLASS__, 'profile_option'));
             add_action('personal_options_update', array(__CLASS__, 'save_profile_option'));
             add_action('edit_user_profile_update', array(__CLASS__, 'save_profile_option'));
 
-            if (get_the_author_meta('dustpress_debugger', get_current_user_id())) {
+            if (
+                get_the_author_meta( 'dustpress_debugger', get_current_user_id() ) ||
+                (
+                    defined( 'DUSTPRESS_DEBUGGER_ALWAYS_ON' ) &&
+                    \DUSTPRESS_DEBUGGER_ALWAYS_ON === true
+                )
+            ) {
                 // Register the debugger script
                 wp_register_script('dustpress_debugger', plugin_dir_url(__FILE__) . 'js/dustpress-debugger.js', ['jquery'], '1.5.2', true);
 
@@ -66,9 +79,17 @@ class Debugger
         }
     }
 
-    public static function use_debugger()
-    {
-        if (is_user_logged_in() && current_user_can('manage_options') && get_the_author_meta('dustpress_debugger', get_current_user_id())) {
+    public static function use_debugger() {
+        if (
+            (
+                is_user_logged_in() &&
+                current_user_can( 'manage_options' ) &&
+                get_the_author_meta( 'dustpress_debugger', get_current_user_id() )
+            ) ||
+            (
+                defined( 'DUSTPRESS_DEBUGGER_ALWAYS_ON' ) &&
+                \DUSTPRESS_DEBUGGER_ALWAYS_ON === true
+            ) ) {
             return true;
         } else {
             return false;
@@ -157,7 +178,7 @@ class Debugger
         if (empty($key)) {
             die('You did not set a key for your debugging data collection.');
         } else {
-            $debug_data_block_name = dustpress()->get_setting('debug_data_block_name');
+            $debug_data_block_name = dustpress()->get_setting( 'debug_data_block_name' ) ?? 'Debug';
 
             if (!isset(self::$data['Debugs'])) {
                 self::$data['Debugs'] = [];
