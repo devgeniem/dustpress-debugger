@@ -57,6 +57,10 @@ window.DustPressDebugger = ( function( window, document, $ ) {
                 }
                 app.jsonData = data.data;
 
+                if ( undefined === app.jsonData.Debugs ) {
+                    app.jsonData.Debugs = {};
+                }
+
                 app.jsonData.Debugs.Ajax = app.waiting;
                 delete app.waiting;
 
@@ -103,6 +107,10 @@ window.DustPressDebugger = ( function( window, document, $ ) {
         }
         // Add the extended data and rerender the JSONView
         else {
+            if ( undefined === app.jsonData.Debugs ) {
+                app.jsonData.Debugs = {};
+            }
+
             if ( undefined === app.jsonData.Debugs.Ajax ) {
                 app.jsonData.Debugs.Ajax = {};
             }
