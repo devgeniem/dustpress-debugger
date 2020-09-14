@@ -57,6 +57,10 @@ window.DustPressDebugger = ( function( window, document, $ ) {
                 }
                 app.jsonData = data.data;
 
+                if ( "undefined" === typeof app.jsonData.Debugs ) {
+                    app.jsonData.Debugs = {};
+                }
+
                 app.jsonData.Debugs.Ajax = app.waiting;
                 delete app.waiting;
 
@@ -69,7 +73,7 @@ window.DustPressDebugger = ( function( window, document, $ ) {
                 );
             },
             error: function(e){
-                console.log("DustPress Debugger Error", e);
+                console.error("DustPress Debugger Error", e);
             }
         });
     };
@@ -103,6 +107,10 @@ window.DustPressDebugger = ( function( window, document, $ ) {
         }
         // Add the extended data and rerender the JSONView
         else {
+            if ( "undefined" === typeof app.jsonData.Debugs ) {
+                app.jsonData.Debugs = {};
+            }
+
             if ( "undefined" === typeof app.jsonData.Debugs.Ajax ) {
                 app.jsonData.Debugs.Ajax = {};
             }
