@@ -1,4 +1,4 @@
-/*
+/**
  * DUSTPRESS DEBUGGER
  */
 window.DustPressDebugger = ( function( window, document, $ ) {
@@ -51,7 +51,7 @@ window.DustPressDebugger = ( function( window, document, $ ) {
                 "action":   "dustpress_debugger",
                 "hash" :    dustpress_debugger.hash
             },
-            success:function(data) {
+            success: function(data) {
                 if (typeof data !== "object") {
                     data = JSON.parse(data);
                 }
@@ -64,8 +64,8 @@ window.DustPressDebugger = ( function( window, document, $ ) {
                 console.log("Debugger", app.jsonData);
 
                 app.jsonView = app.$jsonDiv.JSONView(
-                    app.jsonData,
-                    app.jsonSettings
+                  app.jsonData,
+                  app.jsonSettings
                 );
             },
             error: function(e){
@@ -76,7 +76,7 @@ window.DustPressDebugger = ( function( window, document, $ ) {
 
     app.closeByEsc = function(e) {
         // Escape key maps to keycode 27
-        if (e.keyCode == 27) {
+        if (e.keyCode === 27) {
             if ( ! $(".jsonview_data_debug").hasClass("jsonview_data_debug_closed") ) {
                 app.toggleDebugger();
             }
@@ -95,7 +95,7 @@ window.DustPressDebugger = ( function( window, document, $ ) {
         }
 
         // Catch the data before the JSONView is rendered
-        if ( undefined == app.jsonData ) {
+        if ( "undefined" === typeof app.jsonData ) {
             if ( "undefined" === typeof app.waiting[key] ) {
                 app.waiting[key] = [];
             }
@@ -103,18 +103,19 @@ window.DustPressDebugger = ( function( window, document, $ ) {
         }
         // Add the extended data and rerender the JSONView
         else {
-            if ( undefined === app.jsonData.Debugs.Ajax ) {
+            if ( "undefined" === typeof app.jsonData.Debugs.Ajax ) {
                 app.jsonData.Debugs.Ajax = {};
             }
 
             if ( undefined === app.jsonData.Debugs.Ajax[key] ) {
                 app.jsonData.Debugs.Ajax[key] = [];
             }
+
             app.jsonData.Debugs.Ajax[key].push(data);
 
             app.$jsonDiv.JSONView(
-                app.jsonData,
-                app.jsonSettings
+              app.jsonData,
+              app.jsonSettings
             );
         }
     };
