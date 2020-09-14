@@ -68,8 +68,8 @@ window.DustPressDebugger = ( function( window, document, $ ) {
                 console.log("Debugger", app.jsonData);
 
                 app.jsonView = app.$jsonDiv.JSONView(
-                  app.jsonData,
-                  app.jsonSettings
+                    app.jsonData,
+                    app.jsonSettings
                 );
             },
             error: function(e){
@@ -122,8 +122,8 @@ window.DustPressDebugger = ( function( window, document, $ ) {
             app.jsonData.Debugs.Ajax[key].push(data);
 
             app.$jsonDiv.JSONView(
-              app.jsonData,
-              app.jsonSettings
+                app.jsonData,
+                app.jsonSettings
             );
         }
     };
