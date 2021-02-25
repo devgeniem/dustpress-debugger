@@ -15,7 +15,11 @@ https://github.com/yesmeck/jquery-jsonview
 
     JSONFormatter.prototype.htmlEncode = function(html) {
       if (html !== null) {
-        return html.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        var htmlEncoded = html.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        htmlEncoded = htmlEncoded.replace("[RED]", "<span style='color: red;'>").replace("[/RED]", "</span>");
+
+        return htmlEncoded;
       } else {
         return '';
       }
