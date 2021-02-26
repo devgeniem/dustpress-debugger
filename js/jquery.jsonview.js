@@ -18,6 +18,7 @@ https://github.com/yesmeck/jquery-jsonview
         var htmlEncoded = html.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
         htmlEncoded = htmlEncoded.replace("[RED]", "<span style='color: red;'>").replace("[/RED]", "</span>");
+        htmlEncoded = htmlEncoded.replace("[GREEN]", "<span style='color: green;'>").replace("[/GREEN]", "</span>");
 
         return htmlEncoded;
       } else {
