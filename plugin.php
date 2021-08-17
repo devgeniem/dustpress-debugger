@@ -99,21 +99,24 @@ class Debugger
     /**
      * Sets the hash for the data to the DOM to get.
      * @param object $data DustPress render data
+     * @return object
      */
+    public static function set_hash( $data ) {
 
-    public static function set_hash($data)
-    {
-        // Unique hash
-        self::$hash = md5($_SERVER['REQUEST_URI'] . microtime());
+        // For example if dustpress()->render() will be called multiple times 'dustpress/data' will run multiple times.
+        // The hash cannot change so we need to check if the value has been set already.
+        if ( empty( self::$hash ) ) {
+            self::$hash = md5( $_SERVER['REQUEST_URI'] . microtime() );
+        }
 
         $data_array = array(
-            'ajaxurl'   => admin_url('admin-ajax.php'),
-            'hash'      => self::$hash
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'hash'    => self::$hash
         );
 
-        wp_localize_script('dustpress_debugger', 'dustpress_debugger', $data_array);
+        wp_localize_script( 'dustpress_debugger', 'dustpress_debugger', $data_array );
 
-        wp_enqueue_script('dustpress_debugger');
+        wp_enqueue_script( 'dustpress_debugger' );
 
         return $data;
     }
