@@ -47,11 +47,7 @@ class Debugger
                 )
             ) {
                 // Register the debugger script
-                wp_register_script('dustpress_debugger', plugin_dir_url(__FILE__) . 'js/dustpress-debugger.js', ['jquery'], '1.7.0', true);
-
-                // JsonView jQuery plugin
-                wp_enqueue_style('jquery.jsonview', plugin_dir_url(__FILE__) . 'css/jquery.jsonview.css', null, null, null);
-                wp_enqueue_script('jquery.jsonview', plugin_dir_url(__FILE__) . 'js/jquery.jsonview.js', ['jquery'], '1.7.0', true);
+                wp_register_script('dustpress_debugger', plugin_dir_url(__FILE__) . 'js/dustpress-debugger.js', null, '1.7.6', true);
 
                 // Register debugger ajax hook
                 add_action('wp_ajax_dustpress_debugger', array(__CLASS__, 'get_debugger_data'));

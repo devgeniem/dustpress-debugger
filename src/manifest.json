@@ -1,0 +1,24 @@
+{
+    "manifest_version": 2,
+    "name": "dustpress-debugger",
+    "description": "Provides handy ajaxified debugger tool for DustPress based themes.",
+    "version": "1.0.0",
+    "devtools_page": "index.html",
+    "background": {
+        "scripts": [
+            "background.js",
+            "runtime-background.js"
+        ]
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*/*"
+            ],
+            "js": [
+                "content_script.js",
+                "runtime-content_script.js"
+            ]
+        }
+    ]
+}
