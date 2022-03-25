@@ -1,13 +1,12 @@
 'use strict';
 import * as React from 'react';
 const { Component } = React;
+import ReactJson from 'react-json-view'
 
 export default class DataListener extends Component {
 
     state = {
-        dustpress_debugger: {
-            hash: '',
-        },
+        data: {},
     };
 
     constructor(props) {
@@ -26,8 +25,15 @@ export default class DataListener extends Component {
         });
 
         backgroundPageConnection.onMessage.addListener( (message) => {
-            // Handle responses from the background page, if any
-            console.log('message', message);
+            console.log( 'message', message );
+            if ( typeof message.data !== 'undefined' ) {
+                if ( typeof message.key !== 'undefined' ) {
+                    this.extendData( message );
+                }
+                else {
+                    this.initData( message );
+                }
+            }
         });
 
         backgroundPageConnection.postMessage({
@@ -36,10 +42,20 @@ export default class DataListener extends Component {
         });
     }
 
+    initData( message ) {
+        const parsedData = JSON.parse( message.data );
+        const data       = parsedData.data;
+        this.setState((state) => Object.assign({}, state, { data }));
+    }
+
+    extendData( message ) {
+        console.log( 'extendData', message );
+    }
+
     render() {
-        const { dustpress_debugger } = this.state;
+        const { data } = this.state;
         return <div className="data-listener">
-            {dustpress_debugger.hash}
+            <ReactJson src={data} />
         </div>;
     }
 }

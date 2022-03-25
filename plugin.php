@@ -46,14 +46,10 @@ class Debugger
                     \DUSTPRESS_DEBUGGER_ALWAYS_ON === true
                 )
             ) {
-                // Register the debugger script
-                wp_register_script('dustpress_debugger', plugin_dir_url(__FILE__) . 'js/dustpress-debugger.js', null, '1.7.6', true);
 
                 // Register debugger ajax hook
                 add_action('wp_ajax_dustpress_debugger', array(__CLASS__, 'get_debugger_data'));
                 add_action('wp_ajax_nopriv_dustpress_debugger', array(__CLASS__, 'get_debugger_data'));
-
-                add_filter('dustpress/data', array(__CLASS__, 'set_hash'));
 
                 add_filter('dustpress/data/after_render', array(__CLASS__, 'performance'), 100, 2);
 
@@ -71,6 +67,8 @@ class Debugger
                 // Prevent DustPress for caching the rendered output so that this plugin works
                 add_filter('dustpress/cache/rendered', '__return_false', (PHP_INT_MAX - 1000));
                 add_filter('dustpress/cache/partials', '__return_false', (PHP_INT_MAX - 1000));
+
+                \add_action( 'wp_head', [ __CLASS__, 'wp_head'] );
             }
         }
     }
@@ -97,25 +95,16 @@ class Debugger
      * @param object $data DustPress render data
      * @return object
      */
-    public static function set_hash( $data ) {
+    public static function wp_head() {
+        self::$hash = md5( $_SERVER['REQUEST_URI'] . microtime() );
 
-        // For example if dustpress()->render() will be called multiple times 'dustpress/data' will run multiple times.
-        // The hash cannot change so we need to check if the value has been set already.
-        if ( empty( self::$hash ) ) {
-
-            self::$hash = md5( $_SERVER['REQUEST_URI'] . microtime() );
-
-            $data_array = array(
-                'ajaxurl' => admin_url('admin-ajax.php'),
-                'hash'    => self::$hash
-            );
-
-            wp_localize_script( 'dustpress_debugger', 'dustpress_debugger', $data_array );
-
-            wp_enqueue_script( 'dustpress_debugger' );
+        $data_array = array(
+            'ajaxurl' => \admin_url('admin-ajax.php'),
+            'hash'    => self::$hash
+        );
+        foreach( $data_array as $key => $value ) {
+            \printf( '<meta name="dustpress_debugger:%s" content="%s" />', $key, $value );
         }
-
-        return $data;
     }
 
     /**

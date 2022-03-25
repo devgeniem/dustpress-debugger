@@ -14,9 +14,6 @@ const config = {
     },
     devtool: 'source-map',
     optimization: {
-        runtimeChunk: {
-            name: ( entrypoint ) => `runtime-${entrypoint.name}`,
-        },
         removeAvailableModules: true,
         minimize: true,
         minimizer: [
