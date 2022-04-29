@@ -1,13 +1,15 @@
+import { INIT } from './constants';
+
 // Background page -- background.js
 var connections = {};
 
 chrome.runtime.onConnect.addListener(function (port) {
 
-    var extensionListener = function (message, sender, sendResponse) {
+    const extensionListener = function (message, sender, sendResponse) {
 
         // The original connection event doesn't include the tab ID of the
         // DevTools page, so we need to send it explicitly.
-        if (message.name == "init") {
+        if (message.type == INIT) {
             connections[message.tabId] = port;
             return;
         }
@@ -21,8 +23,8 @@ chrome.runtime.onConnect.addListener(function (port) {
     port.onDisconnect.addListener(function (port) {
         port.onMessage.removeListener(extensionListener);
 
-        var tabs = Object.keys(connections);
-        for (var i = 0, len = tabs.length; i < len; i++) {
+        const tabs = Object.keys(connections);
+        for (const i = 0, len = tabs.length; i < len; i++) {
             if (connections[tabs[i]] == port) {
                 delete connections[tabs[i]]
                 break;
@@ -36,14 +38,14 @@ chrome.runtime.onConnect.addListener(function (port) {
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     // Messages from content scripts should have sender.tab set
     if (sender.tab) {
-        var tabId = sender.tab.id;
+        const tabId = sender.tab.id;
         if (tabId in connections) {
             connections[tabId].postMessage(request);
         } else {
-            console.log("Tab not found in connection list.");
+            console.warn("Tab not found in connection list, reopen developer tools.");
         }
     } else {
-        console.log("sender.tab not defined.");
+        console.warn("sender.tab not defined.");
     }
     return true;
 });

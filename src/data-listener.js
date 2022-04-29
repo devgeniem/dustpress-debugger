@@ -2,12 +2,14 @@
 import * as React from 'react';
 const { Component } = React;
 import ReactJson from 'react-json-view'
+import { DEBUGGER_TAB, DEBUGGER, INIT, NEW, EXTEND } from './constants';
 
 export default class DataListener extends Component {
 
     state = {
         data: {},
     };
+    currentHash = null;
 
     constructor(props) {
         super(props);
@@ -18,44 +20,60 @@ export default class DataListener extends Component {
     }
 
     init() {
-        // DevTools page -- devtools.js
         // Create a connection to the background page
-        var backgroundPageConnection = chrome.runtime.connect({
-            name: "dustpress-debugger-tab"
-        });
+        const connection = chrome.runtime.connect( { name: DEBUGGER_TAB } );
 
-        backgroundPageConnection.onMessage.addListener( (message) => {
-            console.log( 'message', message );
-            if ( typeof message.data !== 'undefined' ) {
-                if ( typeof message.key !== 'undefined' ) {
-                    this.extendData( message );
+        // Handle received messages
+        connection.onMessage.addListener( (message) => {
+            if ( message.source === DEBUGGER ) {
+                if ( message.type === NEW ) {
+                    this.newData( message );
                 }
-                else {
-                    this.initData( message );
-                }
+
+                // if ( message.type === EXTEND ) {
+                //     this.extendData( message );
+                // }
             }
         });
 
-        backgroundPageConnection.postMessage({
-            name: 'init',
-            tabId: chrome.devtools.inspectedWindow.tabId
-        });
+        // Send init message
+        const tabId = chrome.devtools.inspectedWindow.tabId;
+        connection.postMessage( { type: INIT, tabId } );
     }
 
-    initData( message ) {
-        const parsedData = JSON.parse( message.data );
-        const data       = parsedData.data;
-        this.setState((state) => Object.assign({}, state, { data }));
-    }
+    newData( message ) {
+        const { hash, ajaxurl } = message.data;
 
-    extendData( message ) {
-        console.log( 'extendData', message );
+        if ( this.currentHash !== hash ) {
+            this.currentHash = hash;
+            const body = new FormData();
+            body.append( 'action', 'dustpress_debugger' );
+            body.append( 'hash', hash );
+
+            const args = {
+                method: 'POST',
+                body,
+                credentials: 'include',
+            };
+
+            fetch( ajaxurl, args).then( ( response ) => {
+                if ( response.ok ) {
+                    return response.json();
+                }
+            }).then( ( jsonData ) => {
+                const parsedData = JSON.parse( jsonData );
+                const data       = parsedData.data;
+                this.setState((state) => Object.assign({}, state, { data }));
+            }).catch( ( err ) => {
+                console.error( 'DustPress Debugger Error', err );
+            });
+        }
     }
 
     render() {
         const { data } = this.state;
         return <div className="data-listener">
-            <ReactJson src={data} />
+            <ReactJson src={data} collapsed={1} collapseStringsAfterLength={40} />
         </div>;
     }
 }

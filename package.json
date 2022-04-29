@@ -5,7 +5,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "webpack build --mode production",
-        "dev": "webpack serve --mode development"
+        "dev": "webpack serve --mode development",
+        "watch": "webpack watch --mode development"
     },
     "author": "Geniem Oy",
     "license": "GPL-3",
