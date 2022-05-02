@@ -17,20 +17,15 @@ window.DustPressDebugger = (function (window, document) {
             const hash = hashEl[0].content;
             const ajaxurl = ajaxurlEl[0].content;
 
-            // Send hash & ajaxurl periodically to devtools incase it is not open on page load or is closed
-            setInterval(() => app.sendInit(hash, ajaxurl), 1000);
+            app.send({
+                data: {
+                    hash,
+                    ajaxurl
+                },
+                type: NEW,
+                source
+            });
         };
-    }
-
-    app.sendInit = (hash, ajaxurl) => {
-        app.send({
-            data: {
-                hash,
-                ajaxurl
-            },
-            type: NEW,
-            source
-        });
     }
 
     app.extend = (data, key) => {
