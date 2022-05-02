@@ -16,6 +16,7 @@ namespace DustPress;
  */
 class Debugger
 {
+    const SCRIPT_HANDLE = 'dustpress_debugger';
 
     private static $hash;
     private static $data = [];
@@ -97,14 +98,14 @@ class Debugger
      */
     public static function wp_head() {
         self::$hash = md5( $_SERVER['REQUEST_URI'] . microtime() );
-
-        $data_array = array(
+        $data_array = [
             'ajaxurl' => \admin_url('admin-ajax.php'),
             'hash'    => self::$hash
-        );
-        foreach( $data_array as $key => $value ) {
-            \printf( '<meta name="dustpress_debugger:%s" content="%s" />', $key, $value );
-        }
+        ];
+
+        \wp_register_script( static::SCRIPT_HANDLE, '' );
+        \wp_enqueue_script( static::SCRIPT_HANDLE );
+        \wp_localize_script( 'dustpress_debugger', 'dustpress_debugger', $data_array );
     }
 
     /**

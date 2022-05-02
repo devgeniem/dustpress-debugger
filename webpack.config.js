@@ -11,6 +11,7 @@ const config = {
         devtools: './src/devtools.js',
         background: './src/background.js',
         content_script: './src/content_script.js',
+        dustpress_debugger: './src/dustpress-debugger.js',
     },
     devtool: 'source-map',
     optimization: {
@@ -18,18 +19,18 @@ const config = {
         minimize: true,
         minimizer: [
             new JsonMinimizerPlugin(),
-            // new TerserPlugin({
-            //     parallel: true,
-            //     terserOptions: {
-            //         // output: {
-            //         //     comments: false
-            //         // },
-            //         compress: {
-            //             warnings: false,
-            //             drop_console: true // eslint-disable-line camelcase
-            //         }
-            //     }
-            // }),
+            new TerserPlugin({
+                parallel: true,
+                terserOptions: {
+                    output: {
+                        comments: false
+                    },
+                    compress: {
+                        warnings: false,
+                        drop_console: true // eslint-disable-line camelcase
+                    }
+                }
+            }),
         ]
     },
     output: {
@@ -131,7 +132,7 @@ const config = {
 
 module.exports = (env, argv) => {
     if (argv.mode === 'production') {
-        // config.devtool = undefined;
+        config.devtool = undefined;
     }
 
     return config;

@@ -1,0 +1,14 @@
+// Copy general styles from json view "monokai" theme
+body {
+    background-color: rgb(39, 40, 34);
+    color: rgb(249, 248, 245);
+    font-family: monospace;
+}
+
+// Fix showing copy icon moving elements in json view
+.copy-icon {
+    svg {
+        width: .6rem !important;
+        height: .6rem !important;
+    }
+}

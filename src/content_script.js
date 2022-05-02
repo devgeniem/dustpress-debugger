@@ -1,4 +1,3 @@
-import './dustpress-debugger.js';
 import { DEBUGGER } from './constants';
 
 window.addEventListener('message', (event) => {

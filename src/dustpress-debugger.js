@@ -1,3 +1,4 @@
+import './legacy-debugger';
 import { DEBUGGER, NEW, EXTEND } from './constants';
 
 /**
@@ -10,12 +11,8 @@ window.DustPressDebugger = (function (window, document) {
 
     // Runs the debugger
     app.init = () => {
-        const hashEl = document.getElementsByName('dustpress_debugger:hash');
-        const ajaxurlEl = document.getElementsByName('dustpress_debugger:ajaxurl');
-
-        if (hashEl && ajaxurlEl && hashEl[0] && ajaxurlEl[0]) {
-            const hash = hashEl[0].content;
-            const ajaxurl = ajaxurlEl[0].content;
+        if ( typeof dustpress_debugger !== 'undefined' ) {
+            const { hash, ajaxurl } = dustpress_debugger;
 
             app.send({
                 data: {
@@ -25,7 +22,7 @@ window.DustPressDebugger = (function (window, document) {
                 type: NEW,
                 source
             });
-        };
+        }
     }
 
     app.extend = (data, key) => {
