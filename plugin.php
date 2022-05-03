@@ -105,7 +105,7 @@ class Debugger
 
         \wp_register_script( static::SCRIPT_HANDLE, '' );
         \wp_enqueue_script( static::SCRIPT_HANDLE );
-        \wp_localize_script( 'dustpress_debugger', 'dustpress_debugger', $data_array );
+        \wp_localize_script( static::SCRIPT_HANDLE, 'dustpress_debugger', $data_array );
     }
 
     /**
