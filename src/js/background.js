@@ -1,24 +1,27 @@
-import { INIT } from './constants';
+'use strict';
+import 'regenerator-runtime/runtime'; // required by babel
+import { MESSAGE_INIT } from './lib/constants';
 
-var connections = {};
+// Stored connections between content scripts & devtools pages
+let connections = {};
 
+// Add connection listener
 chrome.runtime.onConnect.addListener(function (port) {
 
     const extensionListener = function (message, sender, sendResponse) {
 
         // The original connection event doesn't include the tab ID of the
         // DevTools page, so we need to send it explicitly.
-        if (message.type === INIT) {
+        if (message.type === MESSAGE_INIT) {
             connections[message.tabId] = port;
             return;
         }
-
-        // other message handling
     }
 
     // Listen to messages sent from the DevTools page
     port.onMessage.addListener(extensionListener);
 
+    // Remove stored connection on disconnect
     port.onDisconnect.addListener(function (port) {
         port.onMessage.removeListener(extensionListener);
 
@@ -32,12 +35,13 @@ chrome.runtime.onConnect.addListener(function (port) {
     });
 });
 
-// Receive message from content script and relay to the devTools page for the
-// current tab
+// Receive message from content script and relay to the devTools page for the current tab
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+
     // Messages from content scripts should have sender.tab set
     if (sender.tab) {
         const tabId = sender.tab.id;
+
         if (tabId in connections) {
             connections[tabId].postMessage(request);
         } else {
@@ -46,5 +50,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     } else {
         console.warn("sender.tab not defined.");
     }
+
     return true;
 });

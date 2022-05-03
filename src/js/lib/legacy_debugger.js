@@ -1,3 +1,4 @@
+'use strict';
 // Remove old debugger functionality and cancel any possible ongoing requests from it
 if (
     typeof window.DustPressDebugger !== 'undefined' &&

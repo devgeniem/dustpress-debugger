@@ -7,11 +7,11 @@ const TerserPlugin = require('terser-webpack-plugin');
 const config = {
     target: 'web',
     entry: {
-        index: './src/index.js',
-        devtools: './src/devtools.js',
-        background: './src/background.js',
-        content_script: './src/content_script.js',
-        dustpress_debugger: './src/dustpress-debugger.js',
+        devtools_page: './src/js/devtools_page.js', // registerer for devtools page
+        devtools: './src/js/devtools.js', // devtools page script
+        background: './src/js/background.js', // service worker script
+        content_script: './src/js/content_script.js', // message handling content script
+        content_script_override: './src/js/content_script_override.js', // window.DustPressDebugger & old debugger version override
     },
     devtool: 'source-map',
     optimization: {
@@ -46,7 +46,7 @@ const config = {
         }),
         new CopyPlugin({
             patterns: [
-                { from: "./src/manifest.json", to: "manifest.json" },
+                { from: "./src/json/manifest.json", to: "manifest.json" },
             ],
         }),
     ],
@@ -62,7 +62,10 @@ const config = {
     module: {
         rules: [
             {
-                test: /\.js$/,
+                test: /\.(js|jsx)$/,
+                resolve: {
+                    extensions: ['.js', '.jsx'],
+                },
                 exclude: /node_modules/,
                 use: {
                     loader: 'babel-loader',

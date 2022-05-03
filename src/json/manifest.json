@@ -3,7 +3,7 @@
     "name": "dustpress-debugger",
     "description": "Provides handy ajaxified debugger tool for DustPress based themes.",
     "version": "1.0.0",
-    "devtools_page": "index.html",
+    "devtools_page": "devtools_page.html",
     "background": {
         "service_worker": "background.js"
     },
