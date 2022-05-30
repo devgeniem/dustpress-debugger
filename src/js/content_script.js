@@ -14,7 +14,7 @@ window.addEventListener('message', (event) => {
 
             // Forward to service worker
             try {
-                chrome.runtime.sendMessage(message);
+                browser.runtime.sendMessage(message);
             }
             catch( e ) {
                 console.warn( e );

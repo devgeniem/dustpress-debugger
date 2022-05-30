@@ -1,5 +1,5 @@
 'use strict';
-import { DEBUGGER, MESSAGE_NEW, MESSAGE_EXTEND, MESSAGE_FAIL } from './constants';
+import { BROWSER_CHROME, DEBUGGER, MESSAGE_NEW, MESSAGE_EXTEND, MESSAGE_FAIL } from './constants';
 
 /**
  * DustPressDebugger class
@@ -7,14 +7,20 @@ import { DEBUGGER, MESSAGE_NEW, MESSAGE_EXTEND, MESSAGE_FAIL } from './constants
 export default class DustPressDebugger {
 
     constructor() {
-        this.init();
+        if (BROWSER_TARGET === BROWSER_CHROME) {
+            this.init();
+        }
     }
 
     /**
      * Init debugger & send debugger data to devtools page
      */
     init() {
-        if (typeof dustpress_debugger !== 'undefined') {
+        const windowObj = BROWSER_TARGET === BROWSER_CHROME ? window : window.wrappedJSObject;
+        const dustpress_debugger = typeof windowObj.dustpress_debugger !== 'undefined' ?
+            windowObj.dustpress_debugger : null;
+
+        if (dustpress_debugger) {
             const { hash, ajaxurl } = dustpress_debugger;
 
             this.send({
@@ -25,7 +31,6 @@ export default class DustPressDebugger {
         else {
             this.send({ type: MESSAGE_FAIL });
         }
-
     }
 
     /**

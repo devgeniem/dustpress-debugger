@@ -1,8 +1,8 @@
 'use strict';
 import * as React from 'react';
-const { Component } = React;
+const { Component, Fragment } = React;
 import ReactJson from 'react-json-view'
-import { DEBUGGER_TAB, DEBUGGER, MESSAGE_INIT, MESSAGE_NEW, MESSAGE_EXTEND, MESSAGE_FAIL } from '../lib/constants';
+import { MESSAGE_REQUEST_COOKIE, MESSAGE_REQUEST_SCRIPTING, DEBUGGER_TAB, DEBUGGER, MESSAGE_INIT, MESSAGE_NEW, MESSAGE_EXTEND, MESSAGE_FAIL, BACKGROUND } from '../lib/constants';
 
 export default class Debugger extends Component {
 
@@ -13,94 +13,21 @@ export default class Debugger extends Component {
         hasScriptingPermission: null, // check if extension has scripting access
         hasCookiePermission: null, // check if extension has cookie access
         tab: null, // currently open tab
-        noData: false,
+        noData: false, // if current page works but has no dustpress_debugger data
+        updating: false, // whether we are currently fetching new data
     };
     waiting = {}; // json data to be added to debugger data
+    connection = null; // background.js connection
 
     constructor(props) {
         super(props);
     }
 
     /**
-     * Initialize plugin
+     * Initialize component
      */
     componentDidMount() {
         this.init();
-        this.setTab();
-        chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-            if ( changeInfo.status == 'complete' && tabId === chrome.devtools.inspectedWindow.tabId ) {
-
-                // Reset & recheck state on tab update
-                this.waiting = {};
-                this.setState((state) => Object.assign({}, state, {
-                    hasScriptingPermission: null,
-                    hasCookiePermission: null,
-                    noData: false,
-                    ajaxurl: null,
-                    hash: null,
-                    tab,
-                }));
-
-                this.checkScriptingPermission(tab);
-            }
-        })
-    }
-
-    /**
-     * Set current tab & check permissions
-     */
-    async setTab() {
-        chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-            const tab = tabs[0];
-            this.setState((state) => Object.assign({}, state, { tab }));
-            this.checkScriptingPermission(tab);
-        });
-    }
-
-    /**
-     * Inject content scripts to page
-     *
-     * @param {Object} tab Current tab object. 
-     */
-    injectScripts(tab) {
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ['content_script.js'],
-        });
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ['content_script_override.js'],
-            // Execute in page context to override/create window.DustPressDebugger
-            // and get hash & ajaxurl variables
-            // https://developer.chrome.com/docs/extensions/reference/scripting/#type-ExecutionWorld
-            world: 'MAIN'
-        });
-    }
-
-    /**
-     * Update data permission setting
-     *
-     * @param {*} hasScriptingPermission True|false|null depending on scripting access state.
-     * @param {Object} tab Current tab object.
-     */
-    updateScriptingPermission(hasScriptingPermission, tab) {
-        this.setState((state) => Object.assign({}, state, { hasScriptingPermission }));
-        if (hasScriptingPermission) {
-            this.injectScripts(tab);
-        }
-    }
-
-    /**
-     * Check tab for scripting access
-     *
-     * @param {String} url Url to check.
-     * @returns {Boolean} Whether extension has cookie access or not after request.
-     */
-    checkScriptingPermission(tab) {
-        chrome.permissions.contains({
-            origins: [tab.url],
-            permissions: ['scripting']
-        }).then((hasScriptingPermission) => this.updateScriptingPermission(hasScriptingPermission, tab));
     }
 
     /**
@@ -111,26 +38,7 @@ export default class Debugger extends Component {
     requestScriptingPermission(e) {
         e.preventDefault();
         const { tab } = this.state;
-        chrome.permissions.request({
-            origins: [tab.url],
-            permissions: ['scripting']
-        }).then((hasScriptingPermission) => this.updateScriptingPermission(hasScriptingPermission, tab));
-    }
-
-    /**
-     * Check url for cookie access
-     *
-     * @param {String} url Url to check.
-     * @returns {Boolean} Whether extension has cookie access or not after request.
-     */
-    async checkCookiePermission(url) {
-        const hasCookiePermission = await chrome.permissions.contains({
-            origins: [url],
-            permissions: ['cookies']
-        });
-        this.setState((state) => Object.assign({}, state, { hasCookiePermission }));
-
-        return hasCookiePermission;
+        this.connection.postMessage({ type: MESSAGE_REQUEST_SCRIPTING, tab });
     }
 
     /**
@@ -140,17 +48,8 @@ export default class Debugger extends Component {
      */
     requestCookiePermission(e) {
         e.preventDefault();
-        const { hash, ajaxurl } = this.state;
-
-        chrome.permissions.request({
-            origins: [ajaxurl],
-            permissions: ['cookies']
-        }).then((hasCookiePermission) => {
-            if (hasCookiePermission) {
-                this.setState((state) => Object.assign({}, state, { hasCookiePermission }));
-                this.requestData(hash, ajaxurl);
-            }
-        });
+        const { ajaxurl, tab } = this.state;
+        this.connection.postMessage({ type: MESSAGE_REQUEST_COOKIE, ajaxurl, tab });
     }
 
     /**
@@ -158,44 +57,79 @@ export default class Debugger extends Component {
      */
     init() {
         // Create a connection to the background page
-        const connection = chrome.runtime.connect({ name: DEBUGGER_TAB });
+        this.connection = browser.runtime.connect({ name: DEBUGGER_TAB });
 
         // Handle received messages
-        connection.onMessage.addListener((message) => {
+        this.connection.onMessage.addListener((message) => {
             if (message.source === DEBUGGER) {
                 if (message.type === MESSAGE_NEW) {
                     this.newData(message);
                 }
-
-                if (message.type === MESSAGE_EXTEND) {
+                else if (message.type === MESSAGE_EXTEND) {
                     this.extendData(message);
                 }
-
-                if (message.type === MESSAGE_FAIL) {
+                else if (message.type === MESSAGE_FAIL) {
                     this.noData();
+                }
+            }
+            else if (message.source === BACKGROUND) {
+                if (message.type === MESSAGE_INIT) {
+                    this.initData(message);
+                }
+                else if (message.type === MESSAGE_REQUEST_COOKIE) {
+                    this.setCookiePermission(message);
                 }
             }
         });
 
         // Send init message
-        const tabId = chrome.devtools.inspectedWindow.tabId;
-        connection.postMessage({ type: MESSAGE_INIT, tabId });
+        const tabId = browser.devtools.inspectedWindow.tabId;
+        this.connection.postMessage({ type: MESSAGE_INIT, tabId });
+    }
+
+    /**
+     * Handle init connection message from background page
+     *
+     * @param {Object} message Connection data.
+     */
+    initData(message) {
+        const { tab, hasScriptingPermission } = message;
+        this.setState((state) => Object.assign({}, state, {
+            tab,
+            hasScriptingPermission,
+            hash: null,
+            ajaxurl: null,
+            hasCookiePermission: null,
+            noData: false,
+        }));
+    }
+
+    /**
+     * Handle cookie permission data & request data if access to cookies granted
+     *
+     * @param {Object} message Permission & data request details.
+     */
+    setCookiePermission(message) {
+        const { hash, ajaxurl } = this.state;
+        const { hasCookiePermission } = message;
+        this.setState((state) => Object.assign({}, state, { hasCookiePermission }));
+        if ( hasCookiePermission ) {
+            this.requestData(hash, ajaxurl);
+        }
     }
 
     /**
      * Handle new hash & ajaxurl data from content script.
      * 
-     * @param {Object} message New data. 
+     * @param {Object} message New data.
      */
     async newData(message) {
         const currentHash = this.state.hash;
-        const { hash, ajaxurl } = message.data;
+        const { hash, ajaxurl, hasCookiePermission } = message.data;
 
         // Update data on new hash
         if (currentHash !== hash) {
-            this.setState((state) => Object.assign({}, state, { hash, ajaxurl }));
-            const hasCookiePermission = await this.checkCookiePermission(ajaxurl);
-
+            this.setState((state) => Object.assign({}, state, { hash, ajaxurl, hasCookiePermission }));
             if (hasCookiePermission) {
                 this.requestData(hash, ajaxurl);
             }
@@ -213,7 +147,7 @@ export default class Debugger extends Component {
     /**
      * Request debugger data
      *
-     * @param {String} hash Current tab hash. 
+     * @param {String} hash Current tab hash.
      * @param {String} ajaxurl Current tab ajaxurl.
      */
     requestData(hash, ajaxurl) {
@@ -227,31 +161,35 @@ export default class Debugger extends Component {
             credentials: 'include',
         };
 
+        this.setState((state) => Object.assign({}, state, { updating: true }));
         fetch(ajaxurl, args).then((response) => {
             if (response.ok) {
                 return response.json();
             }
         }).then((jsonData) => {
             const parsedData = typeof jsonData !== 'object' ? JSON.parse(jsonData) : jsonData;
-            const data = parsedData.data;
-
-            if ('undefined' === typeof data.Debugs) {
-                data.Debugs = {};
+            const data = parsedData.data || {};
+            if ( data.length ) {
+                if ('undefined' === typeof data.Debugs) {
+                    data.Debugs = {};
+                }
+    
+                data.Debugs.Ajax = this.waiting;
+                this.waiting = {};
             }
-
-            data.Debugs.Ajax = this.waiting;
-            this.waiting = {};
 
             this.setState((state) => Object.assign({}, state, { data }));
         }).catch((err) => {
             console.error('DustPress Debugger Error', err);
+        }).finally( () => {
+            this.setState((state) => Object.assign({}, state, { updating: false }));
         });
     }
 
     /**
      * Extend current data.
      *
-     * @param {Object} message Message object containing data to add. 
+     * @param {Object} message Message object containing data to add.
      */
     extendData(message) {
         const { data } = this.state;
@@ -286,65 +224,57 @@ export default class Debugger extends Component {
     }
 
     render() {
-        const { data, hasScriptingPermission, hasCookiePermission, tab, hash, ajaxurl, noData } = this.state;
+        const { updating, data, hasScriptingPermission, hasCookiePermission, tab, hash, ajaxurl, noData } = this.state;
 
-        return <div className="debugger">
+        const debuggerClasses = [ 'debugger' ];
+        if ( updating ) {
+            debuggerClasses.push( 'updating' );
+        }
+        return <div className={debuggerClasses.join(' ')}>
             <ReactJson src={data} theme={'monokai'} collapsed={1} collapseStringsAfterLength={40} />
             <hr />
-            <table>
+            <table className="debugger__meta-data">
                 <tbody>
                     <tr>
                         <td>url:</td>
-                        <td>{tab ? tab.url : ''}</td>
+                        <td><input type="text" readOnly value={tab ? tab.url : ''}/></td>
                     </tr>
                     <tr>
                         <td>hash:</td>
-                        <td>{hash}</td>
+                        <td><input type="text" readOnly value={hash || ''}/></td>
                     </tr>
                     <tr>
                         <td>ajaxurl:</td>
-                        <td>{ajaxurl}</td>
+                        <td><input type="text" readOnly value={ajaxurl || ''}/></td>
                     </tr>
                 </tbody>
             </table>
 
-            <p>
-                {hasScriptingPermission ?
-                    <span>Scripting access ok</span>
-                    :
+            { hasScriptingPermission === false && hasScriptingPermission !== null &&
+                <p>
                     <button
-                        disabled={
-                            hasScriptingPermission === null
-                        }
                         onClick={
                             (e) => this.requestScriptingPermission(e)
                         }
                     >Request scripting access</button>
-                }
-            </p>
+                </p>
+            }
 
-            <p>
-                {hasCookiePermission ?
-                    <span>Cookie access ok</span>
-                    :
-                    noData ?
-                        <div>
-                            <p>Hash & ajaxurl not found on page!</p>
-                            <p>Check that you are logged in and dustpress debugger is enabled.</p>
-                        </div>
-                        :
+            { noData ?
+                <Fragment>
+                    <p>Hash & ajaxurl not found on page!</p>
+                    <p>Check that you are logged in and dustpress-debugger is enabled.</p>
+                </Fragment>
+                :
+                hasCookiePermission === false && hasCookiePermission !== null &&
+                    <p>
                         <button
-                            disabled={
-                                hasCookiePermission === null ||
-                                hasScriptingPermission === null ||
-                                hasScriptingPermission === false
-                            }
                             onClick={
                                 (e) => this.requestCookiePermission(e)
                             }
                         >Request cookie access</button>
-                }
-            </p>
+                    </p>
+            }
         </div>
     }
 }

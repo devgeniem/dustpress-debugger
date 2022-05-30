@@ -1,17 +1,20 @@
 'use strict';
+import { BROWSER_CHROME } from './constants';
+
 // Remove old debugger functionality and cancel any possible ongoing requests from it
+const windowObj = BROWSER_TARGET === BROWSER_CHROME ? window : window.wrappedJSObject;
 if (
-    typeof window.DustPressDebugger !== 'undefined' &&
-    typeof window.jQuery !== 'undefined'
+    typeof windowObj.DustPressDebugger !== 'undefined' &&
+    typeof windowObj.jQuery !== 'undefined'
 ) {
-    const $ = window.jQuery;
+    const $ = windowObj.jQuery;
 
     // Remove old debugger init handler & clear any of its relevant functions and data
-    $( document ).off( 'ready', $( document ), window.DustPressDebugger.init );
-    window.DustPressDebugger.init = () => {};
-    window.DustPressDebugger.cache = () => {};
-    window.DustPressDebugger.loadData = () => {};
-    window.DustPressDebugger.$jsonDiv = $();
+    $( document ).off( 'ready', $( document ), windowObj.DustPressDebugger.init );
+    windowObj.DustPressDebugger.init = () => {};
+    windowObj.DustPressDebugger.cache = () => {};
+    windowObj.DustPressDebugger.loadData = () => {};
+    windowObj.DustPressDebugger.$jsonDiv = $();
 
     // Remove old debugger & its button
     $('.jsonview_data_debug').remove();

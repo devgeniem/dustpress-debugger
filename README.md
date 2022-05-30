@@ -42,9 +42,46 @@ You can also activate the debugger on any user by defining `DUSTPRESS_DEBUGGER_A
 
 ## Usage
 
-The debugger prints out a toggle button on the bottom of your page. Clicking the button opens the debugger overlay view. In the debugger view you can:
-* Open and close data sets recursively by holding down the 'Shift' key while clicking an item.
-* Close the debugger by pressing the 'Esc' key.
+Install the browser extension, open your devtools and select the "dustpress-debugger" tab.
+If on chrome you will need to request scripting & cookie access to the relevant urls when opening the view for the first time.
+
+## Building the browser extension
+
+Select the specified node version in the `.nvmrc` file by installing [nvm](https://github.com/nvm-sh/nvm) and running:
+```bash
+nvm install # install specified node version
+nvm use # use specified node version
+```
+Or by installing it manually.
+
+
+Then run the following commands:
+```bash
+npm ci # install npm packages
+npm run build # build the extensions assets
+```
+
+For a firefox build which uses manifest version 2 you can run:
+```bash
+npm run build -- --env=target=firefox
+```
+
+The built assets will be in the `dist/` folder.
+
+### Development version
+
+You can build the development version of the extension by running the commands specified in the building section but instead of `npm run build` run the following:
+```bash
+npm run watch
+```
+
+Or for the firefox version:
+```bash
+npm run watch -- --env=target=firefox
+```
+
+This will build the assets and wait for changes to files.
+Then add the contents of the `dist/` folder as a temporary or unpackaged plugin depending on which browser you are using.
 
 ### Add data with JavaScript
 

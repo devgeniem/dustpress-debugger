@@ -5,7 +5,6 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "webpack build --mode production",
-        "dev": "webpack serve --mode development",
         "watch": "webpack watch --mode development"
     },
     "author": "Geniem Oy",
@@ -39,6 +38,7 @@
         "webpack-cli": "^4.9.1"
     },
     "devDependencies": {
+        "generate-json-from-js-webpack-plugin": "^0.1.1",
         "webpack-dev-server": "^4.6.0"
     }
 }

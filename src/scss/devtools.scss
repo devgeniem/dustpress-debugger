@@ -1,7 +1,10 @@
 // Copy general styles from json view "monokai" theme
+$font-family: monospace;
+$text-color: rgb(249, 248, 245);
+
 body {
-    font-family: monospace;
-    color: rgb(249, 248, 245);
+    font-family: $font-family;
+    color: $text-color;
     background-color: rgb(39, 40, 34);
 }
 
@@ -10,5 +13,54 @@ body {
     svg {
         width: .6rem !important;
         height: .6rem !important;
+    }
+}
+
+.debugger {
+    &__meta-data {
+        width: 100%;
+        max-width: 30rem;
+
+        input {
+            &[readonly] {
+                font-family: $font-family;
+                font-size: .5rem;
+                width: 100%;
+                max-width: 100%;
+                color: $text-color;
+                text-overflow: ellipsis;
+                background: transparent;
+                border: none;
+                appearance: none;
+            }
+        }
+    }
+
+    &.updating {
+        &::after {
+            content: '';
+            position: fixed;
+            display: inline-block;
+            width: .75rem;
+            height: .75rem;
+            top: .5rem;
+            right: .5rem;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+
+            @keyframes spin {
+                to {
+                    -webkit-transform: rotate(360deg);
+                }
+            }
+
+            @-webkit-keyframes spin {
+                to {
+                    -webkit-transform: rotate(360deg);
+                }
+            }
+        }
     }
 }
